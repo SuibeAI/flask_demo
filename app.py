@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 import requests
+import os
 
 app = Flask(__name__)
-app.secret_key = 'dev-secret-key-12345'
+
+# 从环境变量获取密钥，如果没有则使用默认值
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-key-12345')
 
 # 默认股票列表
 DEFAULT_STOCKS = ['MSFT', 'GOOGL']
@@ -84,4 +87,7 @@ def unsubscribe(symbol):
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    # 根据环境变量决定运行模式
+    debug_mode = os.environ.get('FLASK_ENV') == 'development'
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=debug_mode) 
