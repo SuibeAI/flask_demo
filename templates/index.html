@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>实时股票价格</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .search-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .search-input {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .search-button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .stocks-table {
+            width: 100%;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-collapse: collapse;
+        }
+        .stocks-table th {
+            background-color: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .stocks-table td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .stocks-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        .price {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .unsubscribe-btn {
+            padding: 5px 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .subscribe-btn {
+            padding: 5px 10px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .search-results {
+            margin-top: 10px;
+            border-top: 1px solid #dee2e6;
+            padding-top: 10px;
+        }
+        .search-result-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .search-result-item:hover {
+            background-color: #f8f9fa;
+        }
+        .stocks-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .no-results {
+            padding: 10px;
+            text-align: center;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <h1>实时股票价格查询</h1>
+    
+    <!-- 搜索框 -->
+    <div class="search-container">
+        <form action="/" method="GET">
+            <input type="text" name="search" class="search-input" 
+                   placeholder="搜索公司名称或股票代码..." value="{{ search_query }}">
+            <button type="submit" class="search-button">搜索</button>
+        </form>
+        
+        <!-- 搜索结果 -->
+        {% if search_query and search_results %}
+        <div class="search-results">
+            {% for result in search_results %}
+            <div class="search-result-item">
+                <span>{{ result.shortname }} ({{ result.symbol }}) - {{ result.exchange }}</span>
+                <a href="{{ url_for('subscribe', symbol=result.symbol) }}" class="subscribe-btn">添加订阅</a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- 股票列表 -->
+    <div class="stocks-container">
+        <h2>已订阅股票</h2>
+        {% if stocks and stocks|length > 0 %}
+        <table class="stocks-table">
+            <thead>
+                <tr>
+                    <th>股票代码</th>
+                    <th>公司名称</th>
+                    <th>当前价格</th>
+                    <th>交易所</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stocks %}
+                <tr>
+                    <td>{{ stock.symbol }}</td>
+                    <td>{{ stock.company_name }}</td>
+                    <td class="price">{{ stock.currency }} {{ "%.2f"|format(stock.price) }}</td>
+                    <td>{{ stock.exchange }}</td>
+                    <td>
+                        <a href="{{ url_for('unsubscribe', symbol=stock.symbol) }}" 
+                           class="unsubscribe-btn">取消订阅</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-results">暂无订阅股票</div>
+        {% endif %}
+    </div>
+
+    <script>
+        // 每60秒自动刷新页面
+        setTimeout(function(){
+            window.location.reload();
+        }, 60000);
+    </script>
+</body>
+</html> 
